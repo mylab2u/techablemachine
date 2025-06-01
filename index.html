@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ตรวจแผลด้วย AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    video, canvas { width: 100%; max-width: 400px; }
+    .result { font-size: 1.5em; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🔍 ตรวจแผลด้วย AI</h2>
+  <video autoplay playsinline muted width="400" height="300" id="webcam"></video>
+  <div class="result" id="result">⏳ รอกล้องโหลด...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script>
+    const URL = "https://teachablemachine.withgoogle.com/models/abc123/"; // <-- แก้ลิงก์โมเดลตรงนี้
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    async function init() {
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      const flip = true;
+      webcam = new tmImage.Webcam(400, 300, flip);
+      await webcam.setup(); 
+      await webcam.play();
+      window.requestAnimationFrame(loop);
+
+      document.getElementById("webcam").appendChild(webcam.canvas);
+    }
+
+    async function loop() {
+      webcam.update(); 
+      await predict();
+      window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+      const prediction = await model.predict(webcam.canvas);
+      prediction.sort((a, b) => b.probability - a.probability);
+      const top = prediction[0];
+      document.getElementById("result").innerHTML = `🔎 แผลนี้คือ: <strong>${top.className}</strong> (${(top.probability * 100).toFixed(1)}%)`;
+    }
+
+    init();
+  </script>
+</body>
+</html>
