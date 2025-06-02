@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ตรวจสอบความเป็นคน</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #webcam-container, #label-container {
+            margin-top: 10px;
+        }
+
+        #label-container div {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-width: 400px;
+        }
+
+        button {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div>ตรวจสอบความเป็นคน</div>
+    <button type="button" onclick="init()">Start</button>
+    <button type="button" onclick="stopWebcam()">Stop</button>
+    <button type="button" onclick="switchCamera()">Switch Camera</button>
+
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/swdobPScE/";
+
+        let model, webcam, labelContainer, maxPredictions;
+        let verified = false;
+        let useBackCamera = false;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            // Load model and metadata
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Responsive size based on screen
+            const width = Math.min(window.innerWidth * 0.8, 400);
+            const height = width;
+
+            // Camera constraints
+            const constraints = {
+                facingMode: useBackCamera ? "environment" : "user"
+            };
+
+            webcam = new tmImage.Webcam(width, height, true, constraints);
+            await webcam.setup();
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            // Set up containers
+            document.getElementById("webcam-container").innerHTML = "";
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = "";
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+
+            verified = false;
+        }
+
+        async function loop() {
+            if (!verified) {
+                webcam.update();
+                await predict();
+                window.requestAnimationFrame(loop);
+            }
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+
+                if (prediction[i].className === "Human" && prediction[i].probability > 0.9) {
+                    verified = true;
+                    console.log("✅ Human verified!");
+                    alert("✅ Human verified!");
+                    stopWebcam();
+                }
+            }
+        }
+
+        function stopWebcam() {
+            if (webcam && webcam.stop) {
+                webcam.stop();
+            }
+        }
+
+        async function switchCamera() {
+            useBackCamera = !useBackCamera;
+            if (webcam && webcam.stop) {
+                webcam.stop();
+            }
+            await init();
+        }
+    </script>
+</body>
+</html>
