@@ -57,34 +57,42 @@
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
-            // Load model and metadata
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Responsive size based on screen
-            const width = Math.min(window.innerWidth * 0.8, 600);
+            const width = Math.min(window.innerWidth * 0.8, 400);
             const height = width;
 
-            // Camera constraints
             const constraints = {
-                facingMode: useBackCamera ? "environment" : "user"
+                video: {
+                    width: width,
+                    height: height,
+                    facingMode: useBackCamera ? { exact: "environment" } : "user"
+                },
+                audio: false
             };
 
-            webcam = new tmImage.Webcam(width, height, true, constraints);
-            await webcam.setup();
-            await webcam.play();
-            window.requestAnimationFrame(loop);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-            // Set up containers
-            document.getElementById("webcam-container").innerHTML = "";
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
-            labelContainer.innerHTML = "";
-            for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(document.createElement("div"));
+                webcam = new tmImage.Webcam(width, height, true);
+                await webcam.setup({ video: stream });
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // Reset DOM
+                document.getElementById("webcam-container").innerHTML = "";
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                labelContainer = document.getElementById("label-container");
+                labelContainer.innerHTML = "";
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+
+                verified = false;
+            } catch (err) {
+                alert("📷 Unable to access camera: " + err.message);
             }
-
-            verified = false;
         }
 
         async function loop() {
@@ -101,6 +109,12 @@
                 const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 labelContainer.childNodes[i].innerHTML = classPrediction;
 
+                if (prediction[i].className === "Human" && prediction[i].probability > 0.9) {
+                    verified = true;
+                    console.log("✅ Human verified!");
+                    alert("✅ Human verified!");
+                    stopWebcam();
+                }
             }
         }
 
@@ -112,11 +126,9 @@
 
         async function switchCamera() {
             useBackCamera = !useBackCamera;
-            if (webcam && webcam.stop) {
-                webcam.stop();
-            }
+            stopWebcam();
             await init();
         }
     </script>
 </body>
-</html>
+</ht
