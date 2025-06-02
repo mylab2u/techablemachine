@@ -71,7 +71,7 @@
                 const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 labelContainer.childNodes[i].innerHTML = classPrediction;
 
-                if (prediction[i].className === "Human" && prediction[i].probability > 0.9) {
+                if (prediction[i].className === "person" && prediction[i].probability > 0.9) {
                     verified = true;
                     console.log("✅ Human verified!");
                     alert("✅ Human verified!");
