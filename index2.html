@@ -43,7 +43,13 @@
             maxPredictions = model.getTotalClasses();
 
             const flip = true;
-            webcam = new tmImage.Webcam(300, 300, flip);
+            // Calculate responsive size
+            let width = Math.min(window.innerWidth * 0.8, 400); // max 400px, 80% of screen
+            let height = width; // maintain square aspect ratio
+
+            webcam = new tmImage.Webcam(width, height, flip);
+            
+            // webcam = new tmImage.Webcam(300, 300, flip);
             await webcam.setup();
             await webcam.play();
             window.requestAnimationFrame(loop);
