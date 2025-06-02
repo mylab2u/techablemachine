@@ -8,9 +8,15 @@
         margin: 5px 0;
     }
 </style>
-
+<script> 
+function stopWebcam() {
+    webcam.stop();
+}
+</script>
 <div>ตรวจสอบความเป็นคน</div>
 <button type="button" onclick="init()">Start</button>
+<button onclick="stopWebcam()">Stop</button>
+
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -65,6 +71,11 @@
             const classPrediction =
                 prediction[i].className + ": " + prediction[i].probability.toFixed(2);
             labelContainer.childNodes[i].innerHTML = classPrediction;
+        // Example action
+        if (prediction[i].className === "Person" && prediction[i].probability > 0.9) {
+            console.log("Human verified!");
+            // Trigger some action here
+        }
         }
     }
 
