@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ตรวจสอบความเป็นคน</title>
+    <title>ตรวจสอบความเป็นคน v1.0</title>
     <style>
         #webcam-container, #label-container {
             margin-top: 10px;
@@ -44,7 +44,7 @@
 
             const flip = true;
             // Calculate responsive size
-            let width = Math.min(window.innerWidth * 0.8, 400); // max 400px, 80% of screen
+            let width = Math.min(window.innerWidth * 0.8, 800); // max 400px, 80% of screen
             let height = width; // maintain square aspect ratio
 
             webcam = new tmImage.Webcam(width, height, flip);
