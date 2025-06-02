@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>ตรวจสอบความเป็นคน v1.0</title>
     <style>
+        h1 {text-align: center;}
+        p {text-align: center;}
+        div {text-align: center;}
         #webcam-container, #label-container {
             margin-top: 10px;
             text-align: center;
@@ -20,10 +23,11 @@
     </style>
 </head>
 <body>
-
+    <p>
     <div>ตรวจสอบความเป็นคน</div>
-    <button type="button" onclick="init()">Start</button>
-    <button type="button" onclick="stopWebcam()">Stop</button>
+    <div><button type="button" onclick="init()">Start</button></div>
+    <div><button type="button" onclick="stopWebcam()">Stop</button></div>
+    
     <div id="webcam-container"></div>
     <div id="label-container"></div>
 
