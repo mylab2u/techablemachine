@@ -21,7 +21,7 @@
 </head>
 <body>
     <center>
-    <div>ตรวจสอบความเป็นคน</div>
+    <h1>ตรวจสอบความเป็นคน</h1>
     <button type="button" onclick="init()">Start</button>
     <button type="button" onclick="stopWebcam()">Stop</button>
     </center>
@@ -45,7 +45,7 @@
 
             const flip = true;
             // Calculate responsive size
-            let width = Math.min(window.innerWidth * 0.8, 800); // max 400px, 80% of screen
+            let width = Math.min(window.innerWidth * 0.8, 600); // max 400px, 80% of screen
             let height = width; // maintain square aspect ratio
 
             webcam = new tmImage.Webcam(width, height, flip);
