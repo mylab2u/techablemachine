@@ -20,6 +20,9 @@
         #uploaded-image {
             max-width: 300px;
             margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
@@ -32,18 +35,16 @@
 
     <div id="webcam-container"></div>
 
-    <!-- Upload section -->
     <div id="upload-section">
         <input type="file" accept="image/*" onchange="handleImageUpload(event)">
-        <br>
-        <img id="uploaded-image" src="" alt="" />
+        <img id="uploaded-image" src="" alt="Uploaded Image will appear here" />
     </div>
 
     <div id="label-container"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <script type="text/javascript">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
+    <script>
         const URL = "https://teachablemachine.withgoogle.com/models/swdobPScE/";
 
         let model, webcam, labelContainer, maxPredictions;
@@ -96,12 +97,10 @@
             }
         }
 
-        // Handle uploaded image
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Show the image
             const imgElement = document.getElementById('uploaded-image');
             imgElement.src = URL.createObjectURL(file);
             imgElement.onload = async () => {
@@ -110,12 +109,13 @@
                     const metadataURL = URL + "metadata.json";
                     model = await tmImage.load(modelURL, metadataURL);
                     maxPredictions = model.getTotalClasses();
-                    labelContainer = document.getElementById("label-container");
-                    labelContainer.innerHTML = "";
-                    for (let i = 0; i < maxPredictions; i++) {
-                        labelContainer.appendChild(document.createElement("div"));
-                    }
                 }
+
+                labelContainer.innerHTML = "";
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+
                 await predict(imgElement);
             };
         }
