@@ -138,12 +138,12 @@
 
             const flip = true;
             // Calculate responsive size
-            let width = Math.min(window.innerWidth * 0.95, 663); // max 400px, 80% of screen
+            let width = Math.min(window.innerWidth * 0.95, 400); // max 400px, 80% of screen
             let height = width; // maintain square aspect ratio
 
             //webcam = new tmImage.Webcam(width, height, flip);
             
-            webcam = new tmImage.Webcam(600, 600, flip);
+            webcam = new tmImage.Webcam(400, 400, flip);
             await webcam.setup();
             await webcam.play();
             window.requestAnimationFrame(loop);
