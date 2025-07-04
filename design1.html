@@ -62,6 +62,9 @@
       border-radius: 8px;
       cursor: pointer;
     }
+    .camera-options {
+      display: block;
+    }
 
     .btn-secondary {
       background-color: #5cb85c;
@@ -104,9 +107,12 @@
   </header>
 
   <main>
-    <h2>🔍 วิเคราะห์บาดแผล v1.0.6</h2>
+    <h2>🔍 วิเคราะห์บาดแผล v1.0.7</h2>
     <div class="btn-row">
-        <select id="camera-select"></select>
+      <div id="camera-options">
+        <label><input type="radio" name="camera" value="user"> Front Camera</label>
+        <label><input type="radio" name="camera" value="environment" checked> Back Camera</label>
+      </div>
         <!-- Start Camera button -->
         <button class="btn" onclick="init()">สแกน</button>
         <!-- Stop Camera button -->
@@ -138,26 +144,32 @@
             maxPredictions = model.getTotalClasses();
 
             // Select Web cam**********************
-            const cameraSelect = document.getElementById("camera-select");
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(d => d.kind === "videoinput");
+            // const cameraSelect = document.getElementById("camera-select");
+            // const devices = await navigator.mediaDevices.enumerateDevices();
+            // const videoDevices = devices.filter(d => d.kind === "videoinput");
 
             // Populate dropdown with camera options
-            videoDevices.forEach((device, index) => {
-              const option = document.createElement("option");
-              option.value = device.deviceId;
-              //option.text = device.label || `Camera ${index + 1}`;
-              option.text = device.label || `Camera ID ${device.deviceId}`;
-              cameraSelect.appendChild(option);
-            });
+            // videoDevices.forEach((device, index) => {
+            //   const option = document.createElement("option");
+            //   option.value = device.deviceId;
+            //   //option.text = device.label || `Camera ${index + 1}`;
+            //   option.text = device.label || `Camera ID ${device.deviceId}`;
+            //   cameraSelect.appendChild(option);
+            // });
 
             // When user selects a camera
-            cameraSelect.onchange = () => setupWebcam(cameraSelect.value);
+            // cameraSelect.onchange = () => setupWebcam(cameraSelect.value);
 
             // Setup default camera
             //setupWebcam(videoDevices[0].deviceId);
             // ***************************************
-            
+            const cameraSelect = "environment"
+            document.querySelectorAll('input[name="camera"]').forEach((radio) => {
+                radio.addEventListener("change", () => {
+                    cameraSelect = radio.value
+                    //setupWebcam(radio.value); // 'user' or 'environment'
+                });
+            });            
 
             const flip = true;
             // Calculate responsive size
@@ -168,7 +180,8 @@
             
             //webcam = new tmImage.Webcam(400, 400, flip);
             webcam = new tmImage.Webcam(360, 360, flip);
-            await webcam.setup({facingMode: "environment"});
+            await webcam.setup({facingMode: cameraSelect});
+            //await webcam.setup({facingMode: "user"});
             await webcam.play();
             window.requestAnimationFrame(loop);
 
