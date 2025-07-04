@@ -79,7 +79,7 @@
     }
 
     #label-container div {
-      font-size: 30px;
+      font-size: 28px;
       margin: 5px 0;
     }
     #webcam-container {
@@ -106,6 +106,7 @@
   <main>
     <h2>🔍 วิเคราะห์บาดแผล</h2>
     <div class="btn-row">
+        <select id="camera-select"></select>
         <!-- Start Camera button -->
         <button class="btn" onclick="init()">สแกน</button>
         <!-- Stop Camera button -->
@@ -136,6 +137,27 @@
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
+            // Select Web cam**********************
+            const cameraSelect = document.getElementById("camera-select");
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === "videoinput");
+
+            // Populate dropdown with camera options
+            videoDevices.forEach((device, index) => {
+              const option = document.createElement("option");
+              option.value = device.deviceId;
+              option.text = device.label || `Camera ${index + 1}`;
+              cameraSelect.appendChild(option);
+            });
+
+            // When user selects a camera
+            cameraSelect.onchange = () => setupWebcam(cameraSelect.value);
+
+            // Setup default camera
+            setupWebcam(videoDevices[0].deviceId);
+            // ***************************************
+            
+
             const flip = true;
             // Calculate responsive size
             let width = Math.min(window.innerWidth * 0.95, 400); // max 400px, 80% of screen
@@ -143,6 +165,7 @@
 
             //webcam = new tmImage.Webcam(width, height, flip);
             
+            webcam = new tmImage.Webcam(400, 400, flip);
             webcam = new tmImage.Webcam(400, 400, flip);
             await webcam.setup();
             await webcam.play();
