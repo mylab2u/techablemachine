@@ -168,7 +168,7 @@
             
             //webcam = new tmImage.Webcam(400, 400, flip);
             webcam = new tmImage.Webcam(360, 360, flip);
-            await webcam.setup({ deviceId: 0 });
+            await webcam.setup({facingMode: "environment"});
             await webcam.play();
             window.requestAnimationFrame(loop);
 
