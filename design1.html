@@ -104,7 +104,7 @@
   </header>
 
   <main>
-    <h2>🔍 วิเคราะห์บาดแผล v1.0.2</h2>
+    <h2>🔍 วิเคราะห์บาดแผล v1.0.3</h2>
     <div class="btn-row">
         <select id="camera-select"></select>
         <!-- Start Camera button -->
@@ -166,8 +166,8 @@
             //webcam = new tmImage.Webcam(width, height, flip);
             
             //webcam = new tmImage.Webcam(400, 400, flip);
-            webcam = new tmImage.Webcam(360, 360, flip,0);
-            await webcam.setup();
+            webcam = new tmImage.Webcam(360, 360, flip);
+            await webcam.setup({ deviceId: 0 });
             await webcam.play();
             window.requestAnimationFrame(loop);
 
