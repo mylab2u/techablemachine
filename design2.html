@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบตรวจสอบ และวิเคราะห์บาดแผล</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #0275d8;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    main {
+      max-width: 400px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      border-radius: 10px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 1rem; /* optional: space between buttons */
+      justify-content: space-between; /* or center */
+      align-items: center;
+    }
+    .btn {
+      display: block;
+      width: 50%;
+      margin: 1rem 0;
+      padding: 1rem;
+      font-size: 1rem;
+      text-align: center;
+      background-color: #0275d8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-capture {
+      display: block;
+      width: 50%;
+      margin: 1rem 0;
+      padding: 1rem;
+      font-size: 1rem;
+      text-align: center;
+      background-color: hwb(73 2% 66%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background-color: #5cb85c;
+    }
+
+    #preview {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    #preview img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    #label-container div {
+      font-size: 28px;
+      margin: 5px 0;
+    }
+    #webcam-container {
+      align-items: center;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    ระบบตรวจสอบ และวิเคราะห์บาดแผล
+  </header>
+
+  <main>
+    <h2>🔍 วิเคราะห์บาดแผล v1.0.5</h2>
+    <div class="btn-row">
+        <select id="camera-select"></select>
+        <!-- Start Camera button -->
+        <button class="btn" onclick="init()">สแกน</button>
+        <!-- Stop Camera button -->
+        <button class="btn-capture" onclick="stopWebcam()">📸 เก็บภาพ</button>
+    </div>
+    <!-- Upload button 
+    <label class="btn btn-secondary" for="upload">📁 Upload from Gallery</label>
+    <input type="file" accept="image/*" id="upload" onchange="previewImage(event)" />
+
+    <div id="preview"></div>
+
+    <button class="btn" onclick="predictWound()">🧠 Predict Wound</button>
+    -->
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/nGMPLQljN/";
+
+        let model, webcam, labelContainer, maxPredictions;
+        let verified = false;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Select Web cam**********************
+            const cameraSelect = document.getElementById("camera-select");
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === "videoinput");
+
+            // Populate dropdown with camera options
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement("option");
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+        
+            // Choose default: look for "environment" or fallback to first
+            let defaultDeviceId = videoDevices[0]?.deviceId;
+            for (let device of videoDevices) {
+                if (device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("environment")) {
+                    defaultDeviceId = device.deviceId;
+                    break;
+                }
+            }
+        
+            // Listen for manual changes
+            cameraSelect.onchange = () => setupWebcam(cameraSelect.value);
+        
+            // Setup default camera
+            await setupWebcam(defaultDeviceId);
+        
+            // Set default selection in dropdown
+            cameraSelect.value = defaultDeviceId;
+
+        }
+
+        async function setupWebcam(deviceId) {
+            const flip = false; // usually false for back camera
+            const width = Math.min(window.innerWidth * 0.95, 400);
+            const height = width;
+        
+            if (webcam) {
+                await webcam.stop();
+            }
+        
+            webcam = new tmImage.Webcam(width, height, flip, deviceId);
+            await webcam.setup();
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+        
+            document.getElementById("webcam-container").innerHTML = "";
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+        
+            labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = "";
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }        
+        
+        async function loop() {
+            if (!verified) {
+                webcam.update();
+                await predict();
+                window.requestAnimationFrame(loop);
+            }
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+
+            }
+        }
+
+        function stopWebcam() {
+            if (webcam && webcam.stop) {
+                webcam.stop();
+            }
+        }
+    </script>
+  </main>
+
+  <footer>
+    © 2025 BQ | Terms | Privacy Policy
+  </footer>
+
+  <!-- Script to handle image preview -->
+  <script>
+    function previewImage(event) {
+      const reader = new FileReader();
+      reader.onload = function() {
+        const img = document.createElement('img');
+        img.src = reader.result;
+        const preview = document.getElementById('preview');
+        preview.innerHTML = '';
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function startCamera() {
+      alert("For mobile: camera will open when you press 'Upload' and select 'Take Photo'");
+    }
+
+    function predictWound() {
+      alert("This would call the AI backend to analyze the image.");
+    }
+  </script>
+</body>
+</html>
