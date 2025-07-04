@@ -107,7 +107,7 @@
   </header>
 
   <main>
-    <h2>🔍 วิเคราะห์บาดแผล v1.0.7</h2>
+    <h2>🔍 วิเคราะห์บาดแผล v1.0.9</h2>
     <div class="btn-row">
       <div id="camera-options">
         <label><input type="radio" name="camera" value="user"> Front Camera</label>
@@ -163,10 +163,10 @@
             // Setup default camera
             //setupWebcam(videoDevices[0].deviceId);
             // ***************************************
-            const cameraSelect = "environment"
+            let cameraSelect = "environment"
             document.querySelectorAll('input[name="camera"]').forEach((radio) => {
                 radio.addEventListener("change", () => {
-                    cameraSelect = radio.value
+                    cameraSelect = radio.value;
                     //setupWebcam(radio.value); // 'user' or 'environment'
                 });
             });            
