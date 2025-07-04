@@ -104,7 +104,7 @@
   </header>
 
   <main>
-    <h2>🔍 วิเคราะห์บาดแผล v1.0.3</h2>
+    <h2>🔍 วิเคราะห์บาดแผล v1.0.4</h2>
     <div class="btn-row">
         <select id="camera-select"></select>
         <!-- Start Camera button -->
@@ -146,7 +146,8 @@
             videoDevices.forEach((device, index) => {
               const option = document.createElement("option");
               option.value = device.deviceId;
-              option.text = device.label || `Camera ${index + 1}`;
+              //option.text = device.label || `Camera ${index + 1}`;
+              option.text = device.label || `Camera ID ${device.deviceId}`;
               cameraSelect.appendChild(option);
             });
 
