@@ -154,7 +154,7 @@
             cameraSelect.onchange = () => setupWebcam(cameraSelect.value);
 
             // Setup default camera
-            setupWebcam(videoDevices[0].deviceId);
+            //setupWebcam(videoDevices[0].deviceId);
             // ***************************************
             
 
@@ -165,8 +165,8 @@
 
             //webcam = new tmImage.Webcam(width, height, flip);
             
-            webcam = new tmImage.Webcam(400, 400, flip);
-            webcam = new tmImage.Webcam(400, 400, flip);
+            //webcam = new tmImage.Webcam(400, 400, flip);
+            webcam = new tmImage.Webcam(400, 400, flip,videoDevices[0].deviceId);
             await webcam.setup();
             await webcam.play();
             window.requestAnimationFrame(loop);
